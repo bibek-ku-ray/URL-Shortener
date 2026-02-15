@@ -7,6 +7,7 @@ import { treeifyError } from "zod";
 import { hashPasswordWithSalt } from "../utils/hash.js";
 import { createUser, getUserByEmail } from "../service/user.service.js";
 import jwt from "jsonwebtoken";
+import { CreateUserToken } from "../utils/token.js";
 
 export const userRouter = Router();
 
@@ -77,7 +78,8 @@ userRouter.post("/login", async (req, res) => {
     });
   }
 
-  const token = jwt.sign(user.id, process.env.JWT_SECRET);
+  // const token = jwt.sign(user.id, process.env.JWT_SECRET);
+  const token = await CreateUserToken({ id: user.id });
 
   return res.status(200).json({ token });
 });
