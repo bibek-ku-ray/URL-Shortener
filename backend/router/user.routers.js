@@ -1,8 +1,12 @@
 import e, { Router } from "express";
-import { SignupPostRequestBodySchema } from "../validation/request.validation.js";
+import {
+  LoginPostRequestBodySchema,
+  SignupPostRequestBodySchema,
+} from "../validation/request.validation.js";
 import { treeifyError } from "zod";
 import { hashPasswordWithSalt } from "../utils/hash.js";
 import { createUser, getUserByEmail } from "../service/user.service.js";
+import jwt from "jsonwebtoken";
 
 export const userRouter = Router();
 
@@ -42,4 +46,38 @@ userRouter.post("/signup", async (req, res) => {
     data: { userId: user.id },
     message: "User created successfully.",
   });
+});
+
+userRouter.post("/login", async (req, res) => {
+  const validationResult = await LoginPostRequestBodySchema.safeParseAsync(
+    req.body,
+  );
+
+  if (validationResult.error) {
+    return res.status(400).json({
+      error: treeifyError(validationResult.error),
+    });
+  }
+
+  const { email, password } = validationResult.data;
+
+  const user = await getUserByEmail(email);
+
+  if (!user) {
+    return res.status(404).json({
+      error: `User with email: ${email} doesn't exist`,
+    });
+  }
+
+  const { hashedPassword } = hashPasswordWithSalt(password, user.salt);
+
+  if (hashedPassword != user.password) {
+    return res.status(401).json({
+      error: "Invalid Credentials",
+    });
+  }
+
+  const token = jwt.sign(user.id, process.env.JWT_SECRET);
+
+  return res.status(200).json({ token });
 });
