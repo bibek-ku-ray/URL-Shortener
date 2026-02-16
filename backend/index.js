@@ -1,11 +1,13 @@
 import express from "express";
 import { userRouter } from "./router/user.routers.js";
 import urlRouter from "./router/url.router.js";
+import { authenticationMiddleware } from "./middlewares/auth.middleware.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(express.json());
+app.use(authenticationMiddleware)
 
 app.get("/", (req, res) => {
   res.json({

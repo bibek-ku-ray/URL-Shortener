@@ -14,5 +14,14 @@ export const LoginPostRequestBodySchema = z.object({
 
 export const ShortenPostRequestSchema = z.object({
   url: z.url(),
-  code: z.string().optional()
-})
+  code: z.string().optional(),
+});
+
+export const UpdateUrlRequestSchema = z
+  .object({
+    targetUrl: z.url().optional(),
+    shortCode: z.string().min(3).max(50).optional(),
+  })
+  .refine((data) => data.targetUrl || data.shortCode, {
+    message: "At least one field (targetUrl or shortCode) must be provided",
+  });
