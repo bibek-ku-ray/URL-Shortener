@@ -1,4 +1,6 @@
-import e, { Router } from "express";
+import crypto from "node:crypto";
+
+import { Router } from "express";
 import {
   LoginPostRequestBodySchema,
   SignupPostRequestBodySchema,
@@ -6,11 +8,11 @@ import {
 import { treeifyError } from "zod";
 import { hashPasswordWithSalt } from "../utils/hash.js";
 import { createUser, getUserByEmail } from "../service/user.service.js";
-import jwt from "jsonwebtoken";
 import { CreateUserToken } from "../utils/token.js";
 
 export const userRouter = Router();
 
+// Signup route
 userRouter.post("/signup", async (req, res) => {
   // data validation using zod
   const validationResult = await SignupPostRequestBodySchema.safeParseAsync(
@@ -49,6 +51,7 @@ userRouter.post("/signup", async (req, res) => {
   });
 });
 
+// Login route
 userRouter.post("/login", async (req, res) => {
   const validationResult = await LoginPostRequestBodySchema.safeParseAsync(
     req.body,
@@ -72,13 +75,17 @@ userRouter.post("/login", async (req, res) => {
 
   const { hashedPassword } = hashPasswordWithSalt(password, user.salt);
 
-  if (hashedPassword != user.password) {
+  const passwordMatch = crypto.timingSafeEqual(
+    Buffer.from(hashedPassword),
+    Buffer.from(user.password),
+  );
+
+  if (!passwordMatch) {
     return res.status(401).json({
       error: "Invalid Credentials",
     });
   }
 
-  // const token = jwt.sign(user.id, process.env.JWT_SECRET);
   const token = await CreateUserToken({ id: user.id });
 
   return res.status(200).json({ token });

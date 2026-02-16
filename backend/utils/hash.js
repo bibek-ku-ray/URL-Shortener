@@ -9,5 +9,5 @@ export function hashPasswordWithSalt(password, userSalt = undefined) {
     .update(password)
     .digest("hex");
 
-  return {salt, hashedPassword}
+  return { salt, hashedPassword };
 }

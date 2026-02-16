@@ -11,9 +11,19 @@ export async function CreateUserToken(payload) {
     throw new Error(treeifyError(validationResult.error));
   }
 
-  const payloadValidatedData = validationResult.data
+  const payloadValidatedData = validationResult.data;
 
   const token = jwt.sign(payloadValidatedData, JWT_SECRET);
 
   return token;
+}
+
+export function validationUserToken(token) {
+  try {
+    const payload = jwt.verify(token, JWT_SECRET);
+    console.log("verify token payload: ", payload);
+    return payload;
+  } catch (error) {
+    return null;
+  }
 }
