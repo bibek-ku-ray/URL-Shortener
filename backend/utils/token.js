@@ -21,7 +21,6 @@ export async function CreateUserToken(payload) {
 export function validationUserToken(token) {
   try {
     const payload = jwt.verify(token, JWT_SECRET);
-    console.log("verify token payload: ", payload);
     return payload;
   } catch (error) {
     return null;
