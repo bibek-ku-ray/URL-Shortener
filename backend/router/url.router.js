@@ -108,7 +108,6 @@ urlRouter.get("/:shortCode", async (req, res) => {
   const shortCode = req.params.shortCode;
 
   const result = await getTargetUrl(shortCode);
-  console.log("result target", result);
 
   if (!result) {
     return res.status(404).json({
